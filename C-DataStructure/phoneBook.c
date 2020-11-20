@@ -9,56 +9,36 @@
 #include <string.h>
 #include <stdlib.h>
 
-#define INIT_CAPACITY 3 // 배열 재할당 테스트를 위해 작은 사잉즈로
-#define BUFFER_SIZE 50
+#define CAPACITY 100
+#define BUFFER_LENGTH 100
 
-char ** names; // char* 타입의. 배열의 이름이므로 char** 타입의 변수이다.
-char ** numbers;
+// 구조체 struct person을 정의 & 이걸 'struct person' -> 'Person'으로 renaming함!
+typedef struct person {
+    char *name;
+    char *number;
+    char *email;
+    char *group;
+} Person;
 
-int capacity = INIT_CAPACITY; // size of array
+Person directory[CAPACITY];
+
 int n = 0; // number of people in phone directory
 
-char delim[] = " "; // 토크나이저에 쓰이는 구분 문자열
-/*
-   문자열 토크나이저: 구분문자(delimiter)를 이용해 하나의 긴 문자열을 작은 문자열들로 자르는 일
-    잘라진 작은 문자열을 보통 토큰이라 함 ( C ~ strtok function 사용하기도 한다 )
- 
-   cf strtok: 원본 문자열을 변화시킴 (토큰 끝마다'\0'을 삽입함) -> 원본 복사한 것에 시행해야 손실이 없다.
-     strtok시행 후, 문자열 프린트하면, 1번째 토큰만 나타남 ('\0' 때문..)
-    - 새로운 배열을 생성하지 않는다. token = strtok( str, delim ); token = strtok( NULL, delim );
-    - 원본 문자열의 토큰 (xx'\0') 까지의 메모리주소를 리턴한다.
- */
-
-// 배열 names와 numbers 생성
-void init_directory() {
-    names = (char **)malloc(INIT_CAPACITY * sizeof(char *) );
-    numbers = (char **)malloc(INIT_CAPACITY * sizeof(char *) );
-    // malloc ~ 인자로 받는 사이즈의 byte 만큼 메모리 할당 (stdlib.h에 포함)
-    // 위의 경우 3 * 4 (포인터크기) = 12 byte
-}
-void process_command (void);
-
-int phoneBook() {
-    init_directory();
-    process_command();
-    return 0;
-}
-
 void readAll (char* fileName);
-void addOne(char* name, char* number);
+void handleAdd (char* name);
+void addOne (char* name, char* number, char* email, char* group);
 void findOne (char* name);
 void status (void);
 void removeOne (char* name);
 void saveAll (char* fileName);
-
+int composeName (char str[], int limit);
 // line 단위 입력은 fgets, getline 등의 함수를 이용할 수도 있다.
 // 만들 문자열과 문자열의 최대 사이즈 제한을 받아온다.
-int readLine (char str[], int limit) {
+int readLine (FILE* fp, char str[], int n) {
     int ch, i = 0;
-    // 한자씩 stdin을 받을 때, newline 전까지 읽는다.
-    while( (ch = getchar()) != '\n' ) {
-        // null 을 위한 1칸
-        if( i < limit - 1 ) {
+    // 키보드(stdin) || 파일(fp)로부터 한자씩 읽는다! ~ newline('\0') || EOF(파일 마지막) 전까지
+    while( (ch = fgetc(fp)) != '\n' && ch != EOF ) {
+        if( i < n ) {
             str[i++] = ch;
         }
     }
@@ -67,102 +47,136 @@ int readLine (char str[], int limit) {
     return i;
 };
 
-// 실제 비즈니스 로직
-void process_command() {
-    char commandLine[BUFFER_SIZE]; // 한 라인 전체 버퍼
-    char *command, *argument1, *argument2; // 명령어, 1인자 2인자
+int phoneBook() {
+    char commandLine[BUFFER_LENGTH]; // 한 라인 전체 버퍼
+    char *command, *argument;
+    char nameStr[BUFFER_LENGTH];
     
     while(1) {
         printf("$ ");
         
-        if (readLine(commandLine, BUFFER_SIZE) <= 0) {
+        if (readLine(stdin, commandLine, BUFFER_LENGTH) <= 0) {
             // 바로 newline을 치면, while 재개
             continue;
         }
-        command = strtok(commandLine, delim); // 1번째 토큰 생성
-        if (command == NULL) {
-            continue;
-        }
+        // 넘어가면, 줄에 유효한 데이터가 있다는 것! ~ 문자열을 토크나이징해서 데이터를 받아들인다!
+        
+        /*
+           문자열 토크나이저: 구분문자(delimiter)를 이용해 하나의 긴 문자열을 작은 문자열들로 자르는 일
+            잘라진 작은 문자열을 보통 토큰이라 함 ( C ~ strtok function 사용하기도 한다 )
+         
+           cf strtok: 원본 문자열을 변화시킴 (토큰 끝마다'\0'을 삽입함) -> 원본 복사한 것에 시행해야 손실이 없다.
+             strtok시행 후, 문자열 프린트하면, 1번째 토큰만 나타남 ('\0' 때문..)
+            - 새로운 배열을 생성하지 않는다. token = strtok( str, delim ); token = strtok( NULL, delim );
+            - 원본 문자열의 토큰 (xx'\0') 까지의 메모리주소를 리턴한다.
+         */
+        command = strtok(commandLine, " "); // 1번째 토큰 생성
+
         if (strcmp(command, "read") == 0) {
-            argument1 = strtok(NULL, delim); // 2번째 토큰 생성
-            if (argument1 == NULL) {
+            argument = strtok(NULL, " "); // 2번째 토큰 생성
+            if (argument == NULL) {
                 printf("File name required.\n");
                 continue;
             }
-            readAll(argument1); // 파일명 넘기면서 호출
+            readAll(argument); // 파일명 넘기면서 호출
         } else if (strcmp(command, "add") == 0) {
-            argument1 = strtok(NULL, delim); // 토큰2
-            argument2 = strtok(NULL, delim); // 토큰3
-            if (argument1 == NULL || argument2 == NULL) {
-                printf("Invalid arguments.\n");
+            if(composeName(nameStr, BUFFER_LENGTH) <= 0) {
+                printf("Name required.\n");
                 continue;
             }
-            addOne(argument1, argument2);
-            printf("%s was added successfully.\n", argument1);
+            handleAdd(nameStr);
+            printf("%s was added successfully.\n", nameStr);
         } else if (strcmp(command, "find") == 0) {
-            argument1 = strtok(NULL, delim);
-            if (argument1 == NULL) {
-                printf("Invalid arguments.\n");
+            if(composeName(nameStr, BUFFER_LENGTH) <= 0) {
+                printf("Name required.\n");
                 continue;
             }
-            findOne(argument1);
+            findOne(nameStr);
         } else if (strcmp(command, "status") == 0) {
             status();
         } else if (strcmp(command, "delete") == 0) {
-            argument1 = strtok(NULL, delim);
-            if (argument1 == NULL) {
+            if(composeName(nameStr, BUFFER_LENGTH) <= 0) {
                 printf("Invalid arguments.\n");
                 continue;
             }
-            removeOne(argument1);
+            removeOne(nameStr);
         } else if (strcmp(command, "save") == 0) {
-            argument1 = strtok(NULL, delim); // 토큰2
-            argument2 = strtok(NULL, delim); // 토큰3
             // $ save as documents.txt
-            if (argument1 == NULL || strcmp("as", argument1) != 0 || argument2 == NULL) {
-                printf("Invalid command format.\n");
+            argument = strtok(NULL, " "); // 토큰2
+            if (strcmp("as", argument) != 0) {
+                printf("Invalid arguments.\n");
                 continue;
             }
-            saveAll(argument2);
+            argument = strtok(NULL, " ");
+            if (argument == NULL) {
+                printf("Invalid arguments.\n");
+                continue;
+            }
+            saveAll(argument);
         } else if (strcmp(command, "exit") == 0) {
             break;
         }
     }
+    return 0;
 }
 
+int composeName(char str[], int limit) {
+    char* ptr;
+    int length = 0;
+
+    ptr = strtok(NULL," "); // 토크나이저 이어받아서 처리
+    if (ptr == NULL) {
+        return 0;
+    }
+    strcpy(str, ptr); // 자동으로 \0 붙음
+    length += strlen(ptr);
+    
+    while( (ptr = strtok(NULL, " ")) != NULL ) {
+        if (length + strlen(ptr) + 1 < limit) {
+            str[length++] = ' '; // 기존에 이어 붙이는 str에 ' ' 추가
+            str[length] = '\0'; // 문자열 함수 이용을 위해 마감 처리
+            strcat(str, ptr); // str에 토큰 쪼갠 ptr을 붙임 ( 자동으로 \0 붙음 )
+            length += strlen(ptr);
+        }
+    }
+    return length;
+};
 
 int search(char* name) {
     for (int i = 0; i < n; i++) {
-        if (strcmp(name, names[i]) == 0) {
+        if (strcmp(name, directory[i].name) == 0) {
             return i;
         }
     }
     return -1;
 };
 
-void reallocate() {
-    capacity *= 2;
-    // 기존보다 2배 크기로 할당
-    char **tmp1 = (char **)malloc(capacity * sizeof(char *));
-    char **tmp2 = (char **)malloc(capacity * sizeof(char *));
-    
-    // 원본 배열에 있는 값을, 새로 생성한 배열에 넣어줌
-    for (int i = 0; i < n; i++) {
-        tmp1[i] = names[i];
-        tmp2[i] = numbers[i];
-    }
-    
-    // 원본 배열들은 malloc, 동적할당에 의해 만들어졌으므로, garbage(기존배열) 놓아주는 free로 메모리공간 반환한다.
-    free(names);
-    free(numbers);
+void printPerson(Person p) {
+    printf("%s:\n", p.name);
+    printf("    Phone: %s:\n", p.number);
+    printf("    Email: %s:\n", p.email);
+    printf("    Group: %s:\n", p.group);
+}
 
-    // 메모리 반환 후, 새로 만든 배열 바라보도록 처리
-    names = tmp1;
-    numbers = tmp2;
+void handleAdd (char* name) {
+    char number[BUFFER_LENGTH], email[BUFFER_LENGTH], group[BUFFER_LENGTH];
+    char empty[] = " ";
+    
+    printf("  Phone:  ");
+    readLine(stdin, number, BUFFER_LENGTH);
+    
+    printf("  Email:  ");
+    readLine(stdin, email, BUFFER_LENGTH);
+    
+    printf("  Group:  ");
+    readLine(stdin, group, BUFFER_LENGTH);
+ 
+    addOne(name, (char *)(strlen(number) > 0 ? number : empty), (char *)(strlen(number) > 0 ? email : empty), (char *)(strlen(number) > 0 ? group : empty) );
 };
 
 void readAll (char* fileName) {
-    char buf1[BUFFER_SIZE], buf2[BUFFER_SIZE];
+    char buffer[BUFFER_LENGTH];
+    char *name, *number, *email, *group;
     
     // 파일 처리를 위한 파일 포인터 받아옴 (파일 스트림 오픈)
     FILE *fp = fopen(fileName, "r");
@@ -171,28 +185,32 @@ void readAll (char* fileName) {
         return;
     }
     // 파일 끝에 도달할 때 까지 (EOF) 읽고 배열에 저장!
-    while ((fscanf(fp, "%s", buf1) != EOF)) {
-        fscanf(fp, "%s", buf2);
-        addOne(buf1, buf2);
+    while (1) {
+        if (readLine(fp, buffer, BUFFER_LENGTH) <= 0) {
+            break;
+        }
+        // 파일은 # 를 구분자로 함
+        name = strtok(buffer, "#");
+        number = strtok(NULL, "#");
+        email = strtok(NULL, "#");
+        group = strtok(NULL, "#");
+        addOne(name, number, email, group);
     }
     // 파일 처리 후 스트림 종료
     fclose(fp);
 };
 
-void addOne(char* name, char* number) {
-    if (n >= capacity) {
-        reallocate(); // 배열이 다 차면 재할당처리
-    }
-    // 마지막 원소부터 시작해 돌면서, 비교 & 한칸씩 미룸
-    int i = n - 1;
+void addOne(char* name, char* number, char* email, char* group) {
+    int i = n - 1; // 마지막 원소부터 시작해 돌면서, 비교 & 한칸씩 미룸
     // strcmp: 같으면 0 / 전자가 사전문자식에서 후자보다 더 크면(뒤에위치해야함) + / 작으면 -
-    while(i >= 0 && strcmp(names[i], name) > 0) {
-        names[i+1] = names[i];
-        numbers[i+1] = numbers[i];
+    while(i >= 0 && strcmp(directory[i].name, name) > 0) {
+        directory[i+1] = directory[i];
         i--;
     }
-    names[i+1] = strdup(name);
-    numbers[i+1] = strdup(number);
+    directory[i+1].name = strdup(name);
+    directory[i+1].number = strdup(number);
+    directory[i+1].email = strdup(email); // 도중에 공백인 값은 1 space로 구성됨 ~ 붙어있으면 strtok이 같이 뭉개서 무시함.. -> input form 강제!
+    directory[i+1].group = strdup(group);
     /* strdup: 새로운 배열을 만들어 인자로 들어온배열을 카피해 넣고. (length = 기존배열 len + 1)
         새로운 배열의 시작 주소를 리턴함.
        strcpy: 2인자로 들어온 배열을 1인자에 그대로 복사해 넣음. (1,2인자 모두 미리 선언되어
@@ -210,13 +228,13 @@ void findOne(char* name) {
         printf("No person named '%s' exists.\n", name);
         return;
     } else {
-        printf("%s\n", numbers[index]);
+        printPerson(directory[index]);
     }
 }
 
 void status() {
     for (int i = 0; i < n; i++) {
-        printf("%s  %s\n", names[i], numbers[i]);
+        printPerson(directory[i]);
     }
     printf("Total %d persons.\n", n);
 };
@@ -229,8 +247,7 @@ void removeOne(char* name) {
     }
     // 무조건 하나가 빠지므로 n-1까지만 작업한다.
     for (int i = index; i < n-1; i++) {
-        names[i] = names[i+1];
-        numbers[i] = numbers[i+1];
+        directory[i] = directory[i+1]; // 구조체 자체 치환이 가능하다!
     }
     n--;
     printf("'%s' was deleted successfully. \n", name);
@@ -243,10 +260,13 @@ void saveAll (char* fileName) {
         return;
     }
     for (int i = 0; i < n; i++) {
-        fprintf(fp, "%s %s\n", names[i], numbers[i]);
+        fprintf(fp, "%s#", directory[i].name);
+        fprintf(fp, "%s#", directory[i].number);
+        fprintf(fp, "%s#", directory[i].email);
+        fprintf(fp, "%s#\n", directory[i].group);
     }
     fclose(fp);
 };
 
 // cf. 저장한 파일은 /Users/jeongseonmin/Library/Developer/Xcode/DerivedData/프로젝트이름/Build/Products/Debug ~ 에 프로덕트와 함께 위치한다!
-// 정확히는 c
+// 정확히는 /Users/jeongseonmin/Library/Developer/Xcode/DerivedData/C-DataStructure-ciqmpnskopxfeueltlrmriytwrqv/Build/Products/Debug
