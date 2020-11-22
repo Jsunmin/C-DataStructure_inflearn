@@ -9,7 +9,7 @@
 #include <string.h>
 #include <stdlib.h>
 
-#define CAPACITY 100
+#define INIT_CAPACITY 100
 #define BUFFER_LENGTH 100
 
 // 구조체 struct person을 정의 & 이걸 'struct person' -> 'Person'으로 renaming함!
@@ -20,9 +20,16 @@ typedef struct person {
     char *group;
 } Person;
 
-Person directory[CAPACITY];
+Person **directory; // -> dirctory (포인터) direcotry[i] (포인터) ~ 2번 포인터 타면 Person 참조
 
-int n = 0; // number of people in phone directory
+int capacity;
+int n = 0;
+
+void init() {
+    directory = (Person **)malloc(INIT_CAPACITY * sizeof(Person *));
+    capacity = INIT_CAPACITY;
+    n = 0;
+}
 
 void readAll (char* fileName);
 void handleAdd (char* name);
@@ -48,6 +55,7 @@ int readLine (FILE* fp, char str[], int n) {
 };
 
 int phoneBook() {
+    init();
     char commandLine[BUFFER_LENGTH]; // 한 라인 전체 버퍼
     char *command, *argument;
     char nameStr[BUFFER_LENGTH];
@@ -140,27 +148,43 @@ int composeName(char str[], int limit) {
         }
     }
     return length;
-};
+}
 
 int search(char* name) {
     for (int i = 0; i < n; i++) {
-        if (strcmp(name, directory[i].name) == 0) {
+        if (strcmp(name, directory[i]->name) == 0) {
             return i;
         }
     }
     return -1;
-};
+}
 
-void printPerson(Person p) {
-    printf("%s:\n", p.name);
-    printf("    Phone: %s:\n", p.number);
-    printf("    Email: %s:\n", p.email);
-    printf("    Group: %s:\n", p.group);
+void reallocate() {
+    capacity *= 2;
+    Person **tmp = (Person **)malloc(capacity*sizeof(Person *));
+    for (int i = 0; i < n; i++) {
+        tmp[i] = directory[i]; // Person 객체의 주소를 복사한다! (효율 GOOD!)
+    }
+    free(directory);
+    directory = tmp;
+}
+
+void printPerson(Person *p) {
+    printf("%s:\n", p->name);
+    printf("    Phone: %s\n", p->number);
+    printf("    Email: %s\n", p->email);
+    printf("    Group: %s\n", p->group);
+}
+
+void realsePerson(Person *p) {
+    free(p->name);
+    if(p->number != NULL) free(p->number);
+    if(p->email != NULL) free(p->email);
+    if(p->group != NULL) free(p->group);
 }
 
 void handleAdd (char* name) {
     char number[BUFFER_LENGTH], email[BUFFER_LENGTH], group[BUFFER_LENGTH];
-    char empty[] = " ";
     
     printf("  Phone:  ");
     readLine(stdin, number, BUFFER_LENGTH);
@@ -171,13 +195,18 @@ void handleAdd (char* name) {
     printf("  Group:  ");
     readLine(stdin, group, BUFFER_LENGTH);
  
-    addOne(name, (char *)(strlen(number) > 0 ? number : empty), (char *)(strlen(number) > 0 ? email : empty), (char *)(strlen(number) > 0 ? group : empty) );
+    addOne(
+        strdup(name),
+        (char *)(strlen(number) > 0 ? strdup(number) : NULL),
+        (char *)(strlen(number) > 0 ? strdup(email) : NULL),
+        (char *)(strlen(number) > 0 ? strdup(group) : NULL)
+    );
 };
 
 void readAll (char* fileName) {
     char buffer[BUFFER_LENGTH];
     char *name, *number, *email, *group;
-    
+    char *token;
     // 파일 처리를 위한 파일 포인터 받아옴 (파일 스트림 오픈)
     FILE *fp = fopen(fileName, "r");
     if (fp == NULL) {
@@ -189,36 +218,47 @@ void readAll (char* fileName) {
         if (readLine(fp, buffer, BUFFER_LENGTH) <= 0) {
             break;
         }
-        // 파일은 # 를 구분자로 함
+        // 파일은 # 를 구분자로 함 (이름은 필수)
         name = strtok(buffer, "#");
-        number = strtok(NULL, "#");
-        email = strtok(NULL, "#");
-        group = strtok(NULL, "#");
-        addOne(name, number, email, group);
+        token = strtok(NULL, "#"); // 이 후 값은 없을수도 있다.
+        if (strcmp(token, " ") == 0) {
+            number = NULL; // 없으면 NULL로 설정함
+        } else {
+            number = strdup(token);
+        }
+        token = strtok(NULL, "#");
+        if (strcmp(token, " ") == 0) {
+            email = NULL;
+        } else {
+            email = strdup(token);
+        }
+        token = strtok(NULL, "#");
+        if (strcmp(token, " ") == 0) {
+            group = NULL;
+        } else {
+            group = strdup(token);
+        }
+        addOne(strdup(name), number, email, group);
     }
     // 파일 처리 후 스트림 종료
     fclose(fp);
 };
 
 void addOne(char* name, char* number, char* email, char* group) {
+    if ( n >= capacity) {
+        reallocate();
+    }
     int i = n - 1; // 마지막 원소부터 시작해 돌면서, 비교 & 한칸씩 미룸
-    // strcmp: 같으면 0 / 전자가 사전문자식에서 후자보다 더 크면(뒤에위치해야함) + / 작으면 -
-    while(i >= 0 && strcmp(directory[i].name, name) > 0) {
+    // 구조체 포인터에 접근하는 문법! ->
+    while(i >= 0 && strcmp(directory[i]->name, name) > 0) { // strcmp: 같으면 0 / 전자가 사전문자식에서 후자보다 더 크면(뒤에위치해야함) + / 작으면 -
         directory[i+1] = directory[i];
         i--;
     }
-    directory[i+1].name = strdup(name);
-    directory[i+1].number = strdup(number);
-    directory[i+1].email = strdup(email); // 도중에 공백인 값은 1 space로 구성됨 ~ 붙어있으면 strtok이 같이 뭉개서 무시함.. -> input form 강제!
-    directory[i+1].group = strdup(group);
-    /* strdup: 새로운 배열을 만들어 인자로 들어온배열을 카피해 넣고. (length = 기존배열 len + 1)
-        새로운 배열의 시작 주소를 리턴함.
-       strcpy: 2인자로 들어온 배열을 1인자에 그대로 복사해 넣음. (1,2인자 모두 미리 선언되어
-     
-       함수내에서 선언된 배열 주소를 넣어버리면 함수 끝날때 반환되면서 사라짐.. -> strdup 쓰는 이유!
-       Stack 메모리 (지역변수 할당공간)이 아닌 곳에 넣고자!!
-       ( cf. 전역변수 = data section / 동적할당 = Heap / 코드 = code / 지역변수 = Stack ~ 에 메모리 할당 )
-     */
+    directory[i+1] = (Person *)malloc(sizeof(Person));
+    directory[i+1]->name = name;
+    directory[i+1]->number = number;
+    directory[i+1]->email = email;
+    directory[i+1]->group = group;
     n++;
 }
 
@@ -245,11 +285,12 @@ void removeOne(char* name) {
         printf("No person named '%s' exists.\n", name);
         return;
     }
-    // 무조건 하나가 빠지므로 n-1까지만 작업한다.
+    Person *p = directory[index];
     for (int i = index; i < n-1; i++) {
         directory[i] = directory[i+1]; // 구조체 자체 치환이 가능하다!
     }
     n--;
+    realsePerson(p); // p에 맵핑된 구조체 메모리 반환
     printf("'%s' was deleted successfully. \n", name);
 };
 
@@ -260,10 +301,11 @@ void saveAll (char* fileName) {
         return;
     }
     for (int i = 0; i < n; i++) {
-        fprintf(fp, "%s#", directory[i].name);
-        fprintf(fp, "%s#", directory[i].number);
-        fprintf(fp, "%s#", directory[i].email);
-        fprintf(fp, "%s#\n", directory[i].group);
+        printf("%s %s %s %s\n",directory[i]->name, directory[i]->number, directory[i]->email, directory[i]->group);
+        fprintf(fp, "%s#", ( directory[i]->name != NULL ) ? directory[i]->name : " ");
+        fprintf(fp, "%s#", ( directory[i]->number != NULL ) ? directory[i]->number : " ");
+        fprintf(fp, "%s#", ( directory[i]->email != NULL ) ? directory[i]->email : " ");
+        fprintf(fp, "%s#\n", ( directory[i]->group != NULL ) ? directory[i]->group : " ");
     }
     fclose(fp);
 };
