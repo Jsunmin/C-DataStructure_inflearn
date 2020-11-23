@@ -7,9 +7,9 @@
 
 #include <stdio.h>
 
-int phoneBook (void);
+int linkedList (void);
 
 int main(int argc, const char * argv[]) {
-    phoneBook();
+    linkedList();
     return 0;
 }
