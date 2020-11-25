@@ -7,9 +7,9 @@
 
 #include <stdio.h>
 
-int linkedList (void);
+int polynomial (void);
 
 int main(int argc, const char * argv[]) {
-    linkedList();
+    polynomial();
     return 0;
 }
