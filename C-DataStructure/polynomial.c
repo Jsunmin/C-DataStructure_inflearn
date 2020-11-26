@@ -31,7 +31,7 @@ typedef struct aPolynomial {
 // 각 원소들은 다항식 하나하나의 포인터를 갖는다.
 Polynomial *polys[MAX_POLYS];
 
-int n = 0; // 저장된 다항식 개수
+//int n = 0; // 저장된 다항식 개수
 
 void polynomial() {
     

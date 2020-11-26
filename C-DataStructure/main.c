@@ -7,9 +7,9 @@
 
 #include <stdio.h>
 
-int polynomial (void);
+int mp3ManagementProgram (void);
 
 int main(int argc, const char * argv[]) {
-    polynomial();
+    mp3ManagementProgram();
     return 0;
 }

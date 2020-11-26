@@ -11,6 +11,9 @@
 		281F75FF256E9DC500323AE5 /* doublyLinkedList.c in Sources */ = {isa = PBXBuildFile; fileRef = 281F75FE256E9DC500323AE5 /* doublyLinkedList.c */; };
 		28CB518725665AF0005C6D27 /* main.c in Sources */ = {isa = PBXBuildFile; fileRef = 28CB518625665AF0005C6D27 /* main.c */; };
 		28CB518F25665CAC005C6D27 /* phoneBook.c in Sources */ = {isa = PBXBuildFile; fileRef = 28CB518E25665CAC005C6D27 /* phoneBook.c */; };
+		28DFD0D4256FAADA0059C793 /* mp3ManagementProgram.c in Sources */ = {isa = PBXBuildFile; fileRef = 28DFD0D3256FAADA0059C793 /* mp3ManagementProgram.c */; };
+		28DFD0D8256FC32F0059C793 /* mmp_stringTool.c in Sources */ = {isa = PBXBuildFile; fileRef = 28DFD0D7256FC32F0059C793 /* mmp_stringTool.c */; };
+		28DFD0DC256FC35A0059C793 /* mmp_library.c in Sources */ = {isa = PBXBuildFile; fileRef = 28DFD0DB256FC35A0059C793 /* mmp_library.c */; };
 		28E29196256B53B400A00B3C /* linkedList.c in Sources */ = {isa = PBXBuildFile; fileRef = 28E29195256B53B400A00B3C /* linkedList.c */; };
 /* End PBXBuildFile section */
 
@@ -32,6 +35,11 @@
 		28CB518325665AF0005C6D27 /* C-DataStructure */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = "C-DataStructure"; sourceTree = BUILT_PRODUCTS_DIR; };
 		28CB518625665AF0005C6D27 /* main.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = main.c; sourceTree = "<group>"; };
 		28CB518E25665CAC005C6D27 /* phoneBook.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = phoneBook.c; sourceTree = "<group>"; };
+		28DFD0D3256FAADA0059C793 /* mp3ManagementProgram.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = mp3ManagementProgram.c; sourceTree = "<group>"; };
+		28DFD0D6256FC32F0059C793 /* mmp_stringTool.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = mmp_stringTool.h; sourceTree = "<group>"; };
+		28DFD0D7256FC32F0059C793 /* mmp_stringTool.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = mmp_stringTool.c; sourceTree = "<group>"; };
+		28DFD0DA256FC35A0059C793 /* mmp_library.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = mmp_library.h; sourceTree = "<group>"; };
+		28DFD0DB256FC35A0059C793 /* mmp_library.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = mmp_library.c; sourceTree = "<group>"; };
 		28E29195256B53B400A00B3C /* linkedList.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = linkedList.c; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -70,6 +78,11 @@
 				28E29195256B53B400A00B3C /* linkedList.c */,
 				281F2A07256DE4490028926C /* polynomial.c */,
 				281F75FE256E9DC500323AE5 /* doublyLinkedList.c */,
+				28DFD0D3256FAADA0059C793 /* mp3ManagementProgram.c */,
+				28DFD0D6256FC32F0059C793 /* mmp_stringTool.h */,
+				28DFD0D7256FC32F0059C793 /* mmp_stringTool.c */,
+				28DFD0DA256FC35A0059C793 /* mmp_library.h */,
+				28DFD0DB256FC35A0059C793 /* mmp_library.c */,
 			);
 			path = "C-DataStructure";
 			sourceTree = "<group>";
@@ -131,9 +144,12 @@
 			buildActionMask = 2147483647;
 			files = (
 				28CB518725665AF0005C6D27 /* main.c in Sources */,
+				28DFD0D8256FC32F0059C793 /* mmp_stringTool.c in Sources */,
 				281F2A08256DE4490028926C /* polynomial.c in Sources */,
 				281F75FF256E9DC500323AE5 /* doublyLinkedList.c in Sources */,
+				28DFD0DC256FC35A0059C793 /* mmp_library.c in Sources */,
 				28CB518F25665CAC005C6D27 /* phoneBook.c in Sources */,
+				28DFD0D4256FAADA0059C793 /* mp3ManagementProgram.c in Sources */,
 				28E29196256B53B400A00B3C /* linkedList.c in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

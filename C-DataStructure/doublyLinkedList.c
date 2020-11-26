@@ -17,8 +17,8 @@ struct node {
 
 typedef struct node Node;
 
-Node *head; // 순행
-Node *tail; // 역순행
+Node *dlHead; // 순행
+Node *dlTail; // 역순행
 int size = 0;
 
 // 노드 추가시 4개의 링크 작업이 필요하다. q(앞노드) prev next & p(뒷노드) prev next
@@ -44,19 +44,19 @@ void add_after(Node *pre, char *item) {
     new_node->prev = NULL;
     new_node->next = NULL;
     // 첫 노드 세팅 ( 전노드 및 head가 빔.. )
-    if (pre == NULL && head == NULL) {
-        head = new_node;
-        tail = new_node;
+    if (pre == NULL && dlHead == NULL) {
+        dlHead = new_node;
+        dlTail = new_node;
     // 노드는 있고, 맨 앞에 삽입
     } else if (pre == NULL) {
-        new_node->next = head;
-        head->prev = new_node;
-        head = new_node;
+        new_node->next = dlHead;
+        dlHead->prev = new_node;
+        dlHead = new_node;
     // 맨 끝에 삽입
-    } else if (pre == tail) {
-        new_node->prev = tail;
+    } else if (pre == dlTail) {
+        new_node->prev = dlTail;
         pre->next = new_node;
-        tail = new_node;
+        dlTail = new_node;
     // 특정 노드들의 사이 삽입
     } else {
         new_node->prev = pre;
@@ -68,7 +68,7 @@ void add_after(Node *pre, char *item) {
 }
 
 void add_order_list(char *item) {
-    Node *p = tail;
+    Node *p = dlTail;
     while (p != NULL && strcmp(item, p->data) < 0) { // p data 값이 뒤에 위치하면
         p = p->prev;
     }
