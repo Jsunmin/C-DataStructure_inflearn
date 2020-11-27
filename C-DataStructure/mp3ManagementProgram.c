@@ -28,13 +28,31 @@
   사이즈로 나눈 나머지로, 0 ~ size -1까지 아이디를 구분함
 */
 
-void process_command( void );
+void process_command ( void );
+void handle_add(void);
+void handle_load ( void );
 
 void mp3ManagementProgram() {
+    initialize();
+    handle_load();
     process_command();
 }
 
-void handle_add(void);
+void handle_load () {
+    char buffer[BUFFER_LENGTH];
+    
+    printf("Data file name ? ");
+    if (read_line(stdin, buffer, BUFFER_LENGTH) <= 0) {
+        return;
+    }
+    FILE *fp = fopen(buffer, "r");
+    if (fp == NULL) {
+        printf("No such file exists.\n");
+        return;
+    }
+    mmpLoad(fp);
+    fclose(fp);
+};
 
 void process_command() {
     char command_line[BUFFER_LENGTH];
@@ -51,8 +69,8 @@ void process_command() {
 //            handle_search();
 //        } else if (strcmp(command, "remove") == 0) {
 //            handle_remove();
-//        } else if (strcmp(command, "status") == 0) {
-//            handle_status();
+        } else if (strcmp(command, "status") == 0) {
+            handle_status();
 //        } else if (strcmp(command, "play") == 0) {
 //            handle_play();
 //        } else if (strcmp(command, "save") == 0) {
