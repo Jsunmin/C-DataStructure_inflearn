@@ -29,8 +29,13 @@
 */
 
 void process_command ( void );
-void handle_add(void);
 void handle_load ( void );
+void handle_add(void);
+void handle_search ( void );
+void handle_remove ( void );
+void handle_play ( void );
+void handle_save ( void );
+
 
 void mp3ManagementProgram() {
     initialize();
@@ -59,22 +64,26 @@ void process_command() {
     char *command;
     while(1) {
         printf("$ ");
-        if ( read_line(stdin, command_line, BUFFER_LENGTH) < 0 ) {
+        if ( read_line(stdin, command_line, BUFFER_LENGTH) <= 0 ) {
             continue;
         }
         command = strtok(command_line, " ");
         if (strcmp(command, "add") == 0) {
             handle_add();
-//        } else if (strcmp(command, "search") == 0) {
-//            handle_search();
-//        } else if (strcmp(command, "remove") == 0) {
-//            handle_remove();
+        } else if (strcmp(command, "search") == 0) {
+            handle_search();
+        } else if (strcmp(command, "remove") == 0) {
+            handle_remove();
         } else if (strcmp(command, "status") == 0) {
             handle_status();
-//        } else if (strcmp(command, "play") == 0) {
-//            handle_play();
-//        } else if (strcmp(command, "save") == 0) {
-//            handle_save();
+        } else if (strcmp(command, "play") == 0) {
+            handle_play();
+        } else if (strcmp(command, "save") == 0) {
+            char *tmp = strtok(NULL, " ");
+            if (strcmp( tmp, "as") != 0) {
+                continue;
+            }
+            handle_save();
         } else if (strcmp(command, "exit") == 0) {
             break;
         }
@@ -99,4 +108,39 @@ void handle_add() {
     
     // add music lib
     add_song(artist, title, path);
+}
+
+void handle_search() {
+    char name[BUFFER_LENGTH], title[BUFFER_LENGTH];
+    printf("    Artist: ");
+    if ( read_line(stdin, name, BUFFER_LENGTH) <= 0 ) {
+        printf("    Artist name required.\n");
+        return;
+    };
+    printf("    Title: ");
+    int title_len = read_line(stdin, title, BUFFER_LENGTH);
+    if (title_len <= 0) {
+        search_song_artist(name);
+    } else {
+        search_song_artist_title(name, title);
+    };
+}
+
+void handle_remove() {
+    char *id_str = strtok(NULL, " ");
+    int index = atoi(id_str);
+    mmpRemove(index);
+}
+
+void handle_play() {
+    char *id_str = strtok(NULL, " ");
+    int index = atoi(id_str); // ASCII to integer 내장함수
+    play(index);
+}
+
+void handle_save() {
+    char *file_name = strtok(NULL, " ");
+    FILE *fp = fopen(file_name, "w");
+    save(fp);
+    fclose(fp);
 }

@@ -33,4 +33,9 @@ void initialize (void);
 void mmpLoad (FILE *fp);
 void add_song (char *artist, char *title, char *path);
 void handle_status (void);
+void search_song_artist_title(char *artist, char *title);
+void search_song_artist(char *artist);
+void mmpRemove (int index);
+void play (int index);
+void save (FILE *fp);
 #endif /* mmp_library_h */

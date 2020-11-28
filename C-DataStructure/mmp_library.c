@@ -12,14 +12,19 @@
 #include "mmp_stringTool.h"
 
 #define NUM_CHARS 256
+#define SIZE_INDEX_TABLE 100
 #define BUFFER_LENGTH 200
 int num_index = 0;
 
 Artist *artist_directory[NUM_CHARS]; // 모든 UTF-8 값으로 구성할 수 있다! (2^8 = 256)
+SNode *index_directory[SIZE_INDEX_TABLE]; // 단방향 sNode 연결리스트를 담는 배열
 
 void initialize () {
     for( int i = 0; i < NUM_CHARS; i++) {
         artist_directory[i] = NULL;
+    }
+    for( int i = 0; i < SIZE_INDEX_TABLE; i++) {
+        index_directory[i] = NULL;
     }
 }
 
@@ -49,7 +54,7 @@ void mmpLoad (FILE *fp) {
         } else {
             path = strdup(path);
         }
-        printf("%s %s %s\n", name, title, path);
+        add_song(name, title, path);
     }
 }
 
@@ -71,6 +76,8 @@ Song *create_song_instance(Artist *ptr_artist, char *title, char *path) {
     num_index++;
     return ptr_song;
 }
+
+// 올바른 위치 (정렬)에 sNode 삽입
 void insert_node(Artist *ptr_artist, SNode *ptr_snode) {
     SNode *p = ptr_artist->head;
     // head -> 넣으려는 ptr_snode의 title을 비교하면서 직후 노드 위치(p)를 설정한다. (while 이니까, false 떨어지면, title이 더 뒤라는 것!)
@@ -99,6 +106,27 @@ void insert_node(Artist *ptr_artist, SNode *ptr_snode) {
         p->prev = ptr_snode;
     }
 }
+void insert_to_index_dierctory(Song *ptr_song) {
+    SNode *ptr_snode = (SNode *)malloc(sizeof(SNode));
+    ptr_snode->song = ptr_song;
+    ptr_snode->next = NULL;
+    ptr_snode->prev = NULL; // 사용 안함
+    
+    int index = ptr_song->index % SIZE_INDEX_TABLE;
+    SNode *p = index_directory[index];
+    SNode *q = NULL;
+    while( p != NULL && strcmp(p->song->title, ptr_song->title) < 0 ) {
+        p = p->next;
+    }
+    if (q == NULL) { // add first
+        ptr_snode->next = p;
+        index_directory[index] = ptr_snode;
+    } else { // add after q
+        ptr_snode->next = p;
+        q->next = ptr_snode;
+    }
+}
+
 void print_song(Song *ptr_song) {
     printf("    %d: %s, %s\n", ptr_song->index, ptr_song->title, ptr_song->path);
 }
@@ -125,6 +153,23 @@ Artist* find_artist(char *name) {
     } else {
         return NULL;
     }
+}
+SNode* find_snode(Artist *ptr_artist, char *title) {
+    SNode *ptr_snode = ptr_artist->head;
+    while (ptr_snode != NULL && strcmp(ptr_snode->song->title, title) < 0) {
+        ptr_snode = ptr_snode->next;
+    }
+    if (ptr_snode != NULL && strcmp(ptr_snode->song->title, title) == 0) {
+        return ptr_snode;
+    }
+    return NULL;
+}
+SNode* find_song(int index) {
+    SNode *ptr_snode = index_directory[index % SIZE_INDEX_TABLE];
+    while (ptr_snode != NULL && ptr_snode->song->index != index) {
+        ptr_snode = ptr_snode->next;
+    }
+    return ptr_snode;
 }
 
 Artist* add_artist (char *name) {
@@ -165,6 +210,7 @@ void add_song(char *artist, char *title, char *path) {
     
     // insert node
     insert_node(ptr_artist, ptr_snode);
+    insert_to_index_dierctory(ptr_song);
 }
 
 void handle_status() {
@@ -176,3 +222,129 @@ void handle_status() {
         }
     }
 }
+
+// 노래 검색
+void search_song_artist_title(char *artist, char *title) {
+    Artist *ptr_artist = find_artist(artist);
+    if(ptr_artist == NULL) {
+        printf("No such artist exists.\n");
+        return;
+    }
+    SNode *ptr_snode = find_snode(ptr_artist, title);
+    if (ptr_snode != NULL) {
+        printf("Found:\n");
+        print_song(ptr_snode->song);
+    } else {
+        printf("No such song exists.\n");
+    }
+};
+void search_song_artist(char *artist) {
+    Artist *ptr_artist = find_artist(artist);
+    if(ptr_artist == NULL) {
+        printf("No such artist exists.\n");
+        return;
+    }
+    printf("Found:\n");
+    print_artist(ptr_artist);
+};
+
+void play(int index) {
+    SNode *ptr_snode = find_song(index);
+    if (ptr_snode == NULL) {
+        printf("No such song exists.\n");
+    }
+    printf("Found the song: %s\n", ptr_snode->song->title);
+}
+
+void save_song(Song *ptr_song, FILE *fp) {
+    if (ptr_song->artist != NULL) {
+        fprintf(fp, "%s#", ptr_song->artist->name);
+    } else {
+        fprintf(fp, " #");
+    }
+    
+    if (ptr_song->title != NULL) {
+        fprintf(fp, "%s#", ptr_song->title);
+    } else {
+        fprintf(fp, " #");
+    }
+    
+    if (ptr_song->path != NULL) {
+        fprintf(fp, "%s#\n", ptr_song->path);
+    } else {
+        fprintf(fp, " #\n");
+    }
+}
+void save_artist(Artist *p, FILE *fp) {
+    SNode *ptr_snode = p->head;
+    while (ptr_snode != NULL) {
+        save_song(ptr_snode->song, fp);
+        ptr_snode = ptr_snode->next;
+    }
+}
+void save(FILE *fp) {
+    for (int i = 0; i < NUM_CHARS; i++) {
+        Artist *p = artist_directory[i];
+        while( p != NULL ) {
+            save_artist(p, fp);
+            p = p->next;
+        }
+    }
+};
+
+void remove_snode(Artist *ptr_artist, SNode *ptr_snode) {
+    SNode *first = ptr_artist->head;
+    SNode *last = ptr_artist->tail;
+    
+    if (first == ptr_snode && last == ptr_snode) { // unique node
+        
+    } else if (first == ptr_snode) { // 헤드 노드
+        
+    } else if (last == ptr_snode) { // 꼬리 노드
+        
+    } else { // 미들 노드
+        
+    }
+}
+void remove_song(Song *ptr_song) {
+    if (ptr_song->title != NULL) {
+        free(ptr_song->title);
+    }
+    if (ptr_song->path != NULL) {
+        free(ptr_song->path);
+    }
+    free(ptr_song);
+}
+void mmpRemove(int index) {
+    // 단방향 연결리스트이기 때문에
+    SNode *q = NULL; // 직전 노드 필요!
+    SNode *p = index_directory[index % SIZE_INDEX_TABLE]; // 타겟 head 노드
+    while (p != NULL && p->song->index != index) {
+        q = p;
+        p = p->next;
+    }
+    
+    if (p == NULL) { // either empty list or not exist
+        printf("No such song exists.\n");
+        return;
+    }
+    Song *ptr_song = p->song;
+
+    // index_dir sNode 제거
+    if (q == NULL) { // remove first
+        index_directory[index % SIZE_INDEX_TABLE] = p->next; // 첫 head 노드 정보 바꿈
+    } else { // remove after q
+        q->next = p->next; // q->next = q->next->next;
+    }
+    free(p);
+
+    // artist_dir sNode 제거
+    Artist *ptr_artist = ptr_song->artist;
+    SNode *ptr_snode = find_snode(ptr_artist, ptr_song->title);
+    remove_snode(ptr_artist, ptr_snode);
+    
+    // song 구조체 제거
+    remove_song(ptr_song);
+};
+
+
