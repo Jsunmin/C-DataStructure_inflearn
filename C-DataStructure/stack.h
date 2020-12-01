@@ -10,4 +10,5 @@
 
 #include <stdio.h>
 
+typedef struct stack *Stack;
 #endif /* stack_h */

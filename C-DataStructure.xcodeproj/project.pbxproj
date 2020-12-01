@@ -9,6 +9,8 @@
 /* Begin PBXBuildFile section */
 		281F2A08256DE4490028926C /* polynomial.c in Sources */ = {isa = PBXBuildFile; fileRef = 281F2A07256DE4490028926C /* polynomial.c */; };
 		281F75FF256E9DC500323AE5 /* doublyLinkedList.c in Sources */ = {isa = PBXBuildFile; fileRef = 281F75FE256E9DC500323AE5 /* doublyLinkedList.c */; };
+		2830B74C25760D6000CA7A1F /* postFixExp.c in Sources */ = {isa = PBXBuildFile; fileRef = 2830B74B25760D6000CA7A1F /* postFixExp.c */; };
+		2830B74F25761E4500CA7A1F /* inFixExp.c in Sources */ = {isa = PBXBuildFile; fileRef = 2830B74E25761E4500CA7A1F /* inFixExp.c */; };
 		289A3E392574A7B900C881D8 /* stack.c in Sources */ = {isa = PBXBuildFile; fileRef = 289A3E382574A7B900C881D8 /* stack.c */; };
 		28CB518725665AF0005C6D27 /* main.c in Sources */ = {isa = PBXBuildFile; fileRef = 28CB518625665AF0005C6D27 /* main.c */; };
 		28CB518F25665CAC005C6D27 /* phoneBook.c in Sources */ = {isa = PBXBuildFile; fileRef = 28CB518E25665CAC005C6D27 /* phoneBook.c */; };
@@ -33,6 +35,9 @@
 /* Begin PBXFileReference section */
 		281F2A07256DE4490028926C /* polynomial.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = polynomial.c; sourceTree = "<group>"; };
 		281F75FE256E9DC500323AE5 /* doublyLinkedList.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = doublyLinkedList.c; sourceTree = "<group>"; };
+		2830B74A25760D6000CA7A1F /* postFixExp.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = postFixExp.h; sourceTree = "<group>"; };
+		2830B74B25760D6000CA7A1F /* postFixExp.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = postFixExp.c; sourceTree = "<group>"; };
+		2830B74E25761E4500CA7A1F /* inFixExp.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = inFixExp.c; sourceTree = "<group>"; };
 		289A3E372574A7B900C881D8 /* stack.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = stack.h; sourceTree = "<group>"; };
 		289A3E382574A7B900C881D8 /* stack.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = stack.c; sourceTree = "<group>"; };
 		28CB518325665AF0005C6D27 /* C-DataStructure */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = "C-DataStructure"; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -88,6 +93,9 @@
 				28DFD0DB256FC35A0059C793 /* mmp_library.c */,
 				289A3E372574A7B900C881D8 /* stack.h */,
 				289A3E382574A7B900C881D8 /* stack.c */,
+				2830B74A25760D6000CA7A1F /* postFixExp.h */,
+				2830B74B25760D6000CA7A1F /* postFixExp.c */,
+				2830B74E25761E4500CA7A1F /* inFixExp.c */,
 			);
 			path = "C-DataStructure";
 			sourceTree = "<group>";
@@ -149,8 +157,10 @@
 			buildActionMask = 2147483647;
 			files = (
 				28CB518725665AF0005C6D27 /* main.c in Sources */,
+				2830B74F25761E4500CA7A1F /* inFixExp.c in Sources */,
 				28DFD0D8256FC32F0059C793 /* mmp_stringTool.c in Sources */,
 				281F2A08256DE4490028926C /* polynomial.c in Sources */,
+				2830B74C25760D6000CA7A1F /* postFixExp.c in Sources */,
 				289A3E392574A7B900C881D8 /* stack.c in Sources */,
 				281F75FF256E9DC500323AE5 /* doublyLinkedList.c in Sources */,
 				28DFD0DC256FC35A0059C793 /* mmp_library.c in Sources */,
