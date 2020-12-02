@@ -11,8 +11,8 @@
 #include <string.h>
 #include <stdlib.h>
 
-static char OPERATORS_IN[] = "+-*/";
-static int PRECEDENCE_IN[] = {1,1, 2,2}; // 사칙연산 우선순위 게산용
+static char OPERATORS_IN[] = "+-*/()";
+static int PRECEDENCE_IN[] = {1,1, 2,2, -1,-1}; // 사칙연산 우선순위 게산용 ( -1?: 괄호는 그냥 쌓으면 된다. 순서 변경X )
 
 // 스택관련
 Stack operand_stack_in;
@@ -40,7 +40,7 @@ int precedence(char op) {
 }
 
 char *process_op_in(char op, char *pos) {
-    if (is_empty_in(operand_stack_in)) {
+    if (is_empty_in(operand_stack_in) || op == '(') { // 스택이 비거나 여는 괄호면 그대로 푸시
         push_in(operand_stack_in, op);
     } else {
         char top_op = peek_in(operand_stack_in);
@@ -49,13 +49,18 @@ char *process_op_in(char op, char *pos) {
         } else {
             while (!is_empty_in(operand_stack_in) && precedence(op) <= precedence(top_op)) {
                 pop_in(operand_stack_in); // top_op는 위에 정의되어있어서, 저장하지 말고 바로 뺀다! ( & 맨 밑에 top_op 재갱신함 )
+                if (top_op == '(') {
+                    break; // op 순위가 top_op보다 낮거나 같음 & top_op가 여는 괄호 -> op는 닫는 괄호!
+                }
                 sprintf(pos, "%c ", top_op);
                 pos += 2; // 연산자와 공백 더해줌
                 if (!is_empty_in(operand_stack_in)) {
                     top_op = (char)peek_in(operand_stack_in);
                 }
             }
-            push_in(operand_stack_in, op);
+            if ( op != ')') { // 닫는 괄호는 스택 추가X
+                push_in(operand_stack_in, op);
+            }
         }
     }
     return pos;
@@ -81,6 +86,9 @@ char *convert(char *infix) { // postfix 값을 리턴하는 함수
     }
     while( !is_empty_in(operand_stack_in) ) {
         char op = (char)pop_in(operand_stack_in);
+        if (op == '(') {
+            handle_exception("Syntax Error: Unmatched parenthesis.");
+        }
         sprintf(pos, "%c ", op);
         pos += 2;
     }
