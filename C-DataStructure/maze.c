@@ -7,6 +7,7 @@
 
 #include <stdio.h>
 #include "stack.h"
+#include "queue.h"
 
 #define MAX 100
 #define PATH 0 // 지나갈 수 있는 위치
@@ -17,6 +18,8 @@
 typedef struct pos {
     int x, y;
 } Position;
+
+// DFS / BFS 각각 스택과 큐로 풀어보자!!
 
 Position move_to(Position pos, int dir);
 
@@ -76,3 +79,35 @@ void mazeProg() {
     print_maze();
 }
 
+
+// 큐를 통한 넓이 우선 탐색
+// 방문 표시를 음수 표시( -1 ... -n )로 둬서, 0, 1 ~ 벽과 길을 구분함.
+
+void mazeProgQ() {
+    read_maze();
+
+    Queue queue = create_queue();
+    Position cur;
+    cur.x = 0;
+    cur.y = 0;
+
+    enqueue(queue, cur); // 현재 위치를 넣는다.
+    maze[0][0] = -1; // -1부터 점점 -n으로.. 최단 거리를 찾는다.
+    bool found = false;
+    
+    while(!is_empty_q(queue)) { // q가 비었으면 종료 ~ 미로 길이 없다?!
+        Position cur = dequeue(queue);
+        for (int dir = 0; dir < 4; dir++) {
+            if (movalble(cur, dir)) {
+                Position p = move_to(cur, dir);
+                maze[p.x][p.y] = maze[cur.x][cur.y] - 1; // 미로에서 이동할 위치는, 그전 위치 - 1 처리!
+                if (p.x == n-1 && p.y == n-1) { // 마지막 지점에 도착했으면 종료
+                    printf("Found the path.\n");
+                    found = true;
+                    break;
+                }
+                enqueue(queue, p);
+            }
+        }
+    }
+}

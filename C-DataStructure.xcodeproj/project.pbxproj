@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		281F2A08256DE4490028926C /* polynomial.c in Sources */ = {isa = PBXBuildFile; fileRef = 281F2A07256DE4490028926C /* polynomial.c */; };
 		281F75FF256E9DC500323AE5 /* doublyLinkedList.c in Sources */ = {isa = PBXBuildFile; fileRef = 281F75FE256E9DC500323AE5 /* doublyLinkedList.c */; };
+		2828197B25786F0700BB223B /* queue.c in Sources */ = {isa = PBXBuildFile; fileRef = 2828197A25786F0700BB223B /* queue.c */; };
 		2830B74C25760D6000CA7A1F /* postFixExp.c in Sources */ = {isa = PBXBuildFile; fileRef = 2830B74B25760D6000CA7A1F /* postFixExp.c */; };
 		2830B74F25761E4500CA7A1F /* inFixExp.c in Sources */ = {isa = PBXBuildFile; fileRef = 2830B74E25761E4500CA7A1F /* inFixExp.c */; };
 		284ABBF125778BC10026D9F2 /* maze.c in Sources */ = {isa = PBXBuildFile; fileRef = 284ABBF025778BC10026D9F2 /* maze.c */; };
@@ -36,6 +37,8 @@
 /* Begin PBXFileReference section */
 		281F2A07256DE4490028926C /* polynomial.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = polynomial.c; sourceTree = "<group>"; };
 		281F75FE256E9DC500323AE5 /* doublyLinkedList.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = doublyLinkedList.c; sourceTree = "<group>"; };
+		2828197925786F0700BB223B /* queue.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = queue.h; sourceTree = "<group>"; };
+		2828197A25786F0700BB223B /* queue.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = queue.c; sourceTree = "<group>"; };
 		2830B74A25760D6000CA7A1F /* postFixExp.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = postFixExp.h; sourceTree = "<group>"; };
 		2830B74B25760D6000CA7A1F /* postFixExp.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = postFixExp.c; sourceTree = "<group>"; };
 		2830B74E25761E4500CA7A1F /* inFixExp.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = inFixExp.c; sourceTree = "<group>"; };
@@ -99,6 +102,8 @@
 				2830B74B25760D6000CA7A1F /* postFixExp.c */,
 				2830B74E25761E4500CA7A1F /* inFixExp.c */,
 				284ABBF025778BC10026D9F2 /* maze.c */,
+				2828197925786F0700BB223B /* queue.h */,
+				2828197A25786F0700BB223B /* queue.c */,
 			);
 			path = "C-DataStructure";
 			sourceTree = "<group>";
@@ -170,6 +175,7 @@
 				28DFD0DC256FC35A0059C793 /* mmp_library.c in Sources */,
 				28CB518F25665CAC005C6D27 /* phoneBook.c in Sources */,
 				28DFD0D4256FAADA0059C793 /* mp3ManagementProgram.c in Sources */,
+				2828197B25786F0700BB223B /* queue.c in Sources */,
 				28E29196256B53B400A00B3C /* linkedList.c in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
